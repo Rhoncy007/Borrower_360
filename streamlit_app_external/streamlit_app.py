@@ -133,16 +133,22 @@ with tab_lookup:
             st.dataframe(recs, use_container_width=True)
 
 with tab_ask:
-    st.caption("Ask a question in plain English. Answered via Cortex Analyst over BORROWER_360_MODEL.")
-    q = st.text_input("Question", placeholder="Which borrowers are at highest risk of balance transfer?")
-    if st.button("Ask") and q:
-        with st.spinner("Querying Cortex Analyst..."):
-            text_reply, sql_text = call_analyst(q)
-        if text_reply:
-            st.write(text_reply)
-        if sql_text:
-            st.code(sql_text, language="sql")
-            try:
-                st.dataframe(run(sql_text), use_container_width=True)
-            except Exception as e:
-                st.error(f"Could not execute generated SQL: {e}")
+    if not st.secrets["snowflake"].get("pat"):
+        st.info(
+            "Cortex Analyst chat is disabled - no PAT configured in secrets. "
+            "Add a 'pat' key under [snowflake] in app secrets to enable it."
+        )
+    else:
+        st.caption("Ask a question in plain English. Answered via Cortex Analyst over BORROWER_360_MODEL.")
+        q = st.text_input("Question", placeholder="Which borrowers are at highest risk of balance transfer?")
+        if st.button("Ask") and q:
+            with st.spinner("Querying Cortex Analyst..."):
+                text_reply, sql_text = call_analyst(q)
+            if text_reply:
+                st.write(text_reply)
+            if sql_text:
+                st.code(sql_text, language="sql")
+                try:
+                    st.dataframe(run(sql_text), use_container_width=True)
+                except Exception as e:
+                    st.error(f"Could not execute generated SQL: {e}")
