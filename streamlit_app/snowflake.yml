@@ -1,0 +1,13 @@
+definition_version: 2
+entities:
+  borrower_360_app:
+    type: streamlit
+    identifier:
+      name: BORROWER_360_APP
+      database: BORROWER360
+      schema: APP
+    query_warehouse: COMPUTE_WH
+    main_file: streamlit_app.py
+    artifacts:
+      - streamlit_app.py
+      - pyproject.toml

@@ -1,0 +1,14 @@
+version: 1
+artifacts:
+  - path: BORROWER_360_MODEL.sv.yaml
+    type: semantic_view
+  - path: ..\proto\borrower_360.sv.yaml
+    type: semantic_view
+    targets:
+      default:
+        object: BORROWER360.SEMANTIC.BORROWER_360_MODEL
+  - path: BORROWER_360_AGENT.agent.yaml
+    type: cortex_agent
+    targets:
+      default:
+        object: BORROWER360.SEMANTIC.BORROWER_360_AGENT

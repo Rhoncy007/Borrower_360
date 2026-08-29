@@ -1,0 +1,42 @@
+{
+  "test_run_at": "2026-08-21T15:35:24.241481+00:00",
+  "connected_as_user": "BORROWER360_ENRICHMENT_SVC",
+  "connected_as_role": "BORROWER360_ENRICHMENT_ROLE",
+  "account": "XM85110",
+  "results": [
+    {
+      "query_name": "Q1_count_hidden_labels",
+      "sql": "SELECT COUNT(*) FROM UTIL.GROUND_TRUTH_HIDDEN",
+      "outcome": "DENIED",
+      "error_code": 2003,
+      "error_text": "002003 (02000): SQL compilation error:\nSchema 'BORROWER360.UTIL' does not exist or not authorized."
+    },
+    {
+      "query_name": "Q2_select_star_hidden",
+      "sql": "SELECT * FROM UTIL.GROUND_TRUTH_HIDDEN LIMIT 1",
+      "outcome": "DENIED",
+      "error_code": 2003,
+      "error_text": "002003 (02000): SQL compilation error:\nSchema 'BORROWER360.UTIL' does not exist or not authorized."
+    },
+    {
+      "query_name": "Q3_show_tables_util",
+      "sql": "SHOW TABLES IN SCHEMA UTIL",
+      "outcome": "DENIED",
+      "error_code": 2043,
+      "error_text": "002043 (02000): SQL compilation error:\nObject does not exist, or operation cannot be performed."
+    },
+    {
+      "query_name": "Q4_cross_schema_join",
+      "sql": "SELECT c.interaction_id, g.ground_truth_label\n        FROM CURATED.CALL_TRANSCRIPT c\n        JOIN UTIL.GROUND_TRUTH_HIDDEN g USING (interaction_id) LIMIT 1",
+      "outcome": "DENIED",
+      "error_code": 2003,
+      "error_text": "002003 (02000): SQL compilation error:\nSchema 'BORROWER360.UTIL' does not exist or not authorized."
+    },
+    {
+      "query_name": "Q0_control_can_read_transcripts",
+      "sql": "SELECT COUNT(*) FROM CURATED.CALL_TRANSCRIPT",
+      "outcome": "SUCCEEDED",
+      "row_sample": "[(2700,)]"
+    }
+  ]
+}

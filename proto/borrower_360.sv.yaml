@@ -1,0 +1,217 @@
+name: BORROWER_360_MODEL
+description: Unified borrower 360 for an Indian mixed-NBFC retail lending portfolio.
+  Combines RBI-compliant credit risk classification (borrower-level, per IRAC norms),
+  balance-transfer flight risk (structurally separated from credit risk - a distressed
+  borrower always scores zero BT risk), a lifetime-value proxy (expected future interest
+  income from the real amortization schedule, assuming the loan runs to full term),
+  and sentiment/behavioral trajectory signals derived from sequenced call transcripts.
+  Paired with the deterministic next-best-action recommendation engine, where every
+  action traces to a named rule and carries an expected value.
+tables:
+  - name: BORROWER_360
+    base_table:
+      database: BORROWER360
+      schema: CURATED
+      table: BORROWER_360
+    primary_key:
+      columns:
+        - BORROWER_ID
+    dimensions:
+      - name: BORROWER_ID
+        expr: BORROWER_ID
+        data_type: VARCHAR
+      - name: FULL_NAME
+        expr: FULL_NAME
+        data_type: VARCHAR
+      - name: CITY
+        expr: CITY
+        data_type: VARCHAR
+      - name: STATE
+        expr: STATE
+        data_type: VARCHAR
+      - name: CITY_TIER
+        expr: CITY_TIER
+        data_type: NUMBER
+      - name: OCCUPATION_TYPE
+        expr: OCCUPATION_TYPE
+        data_type: VARCHAR
+      - name: MONTHLY_INCOME_INR
+        expr: MONTHLY_INCOME_INR
+        data_type: NUMBER
+      - name: BUREAU_SCORE
+        expr: BUREAU_SCORE
+        data_type: NUMBER
+      - name: BUREAU_SCORE_BAND
+        expr: BUREAU_SCORE_BAND
+        data_type: VARCHAR
+      - name: OWN_LOAN_COUNT
+        expr: OWN_LOAN_COUNT
+        data_type: NUMBER
+      - name: OWN_PRODUCT_COUNT
+        expr: OWN_PRODUCT_COUNT
+        data_type: NUMBER
+      - name: BORROWER_ASSET_CLASS
+        expr: BORROWER_ASSET_CLASS
+        data_type: VARCHAR
+      - name: IS_NPA
+        expr: IS_NPA
+        data_type: BOOLEAN
+      - name: NPA_UPGRADE_ELIGIBLE
+        expr: NPA_UPGRADE_ELIGIBLE
+        data_type: BOOLEAN
+      - name: PERFORMING_LOANS_DRAGGED_TO_NPA
+        expr: PERFORMING_LOANS_DRAGGED_TO_NPA
+        data_type: NUMBER
+      - name: IS_LOAN_STACKED
+        expr: IS_LOAN_STACKED
+        data_type: BOOLEAN
+      - name: TOTAL_LENDER_COUNT
+        expr: TOTAL_LENDER_COUNT
+        data_type: NUMBER
+      - name: EARLY_WARNING_MANDATES
+        expr: EARLY_WARNING_MANDATES
+        data_type: NUMBER
+      - name: BT_IS_A_FLIGHT_RISK
+        expr: BT_IS_A_FLIGHT_RISK
+        data_type: BOOLEAN
+      - name: N_INTERACTIONS
+        expr: N_INTERACTIONS
+        data_type: NUMBER
+      - name: OVERALL_SENTIMENT_DIRECTION
+        expr: OVERALL_SENTIMENT_DIRECTION
+        data_type: VARCHAR
+      - name: ANY_PTP_MADE_THEN_MISSED
+        expr: ANY_PTP_MADE_THEN_MISSED
+        data_type: BOOLEAN
+      - name: ANY_REASON_CHANGE
+        expr: ANY_REASON_CHANGE
+        data_type: BOOLEAN
+      - name: DAYS_GAP_TREND
+        expr: DAYS_GAP_TREND
+        data_type: VARCHAR
+      - name: N_PENDING_RECOMMENDATIONS
+        expr: N_PENDING_RECOMMENDATIONS
+        data_type: NUMBER
+      - name: HAS_COLLECTIONS_ACTION
+        expr: HAS_COLLECTIONS_ACTION
+        data_type: BOOLEAN
+      - name: HAS_RETENTION_OFFER
+        expr: HAS_RETENTION_OFFER
+        data_type: BOOLEAN
+      - name: HAS_GROWTH_OFFER
+        expr: HAS_GROWTH_OFFER
+        data_type: BOOLEAN
+      - name: IS_DEMO_CASE
+        expr: IS_DEMO_CASE
+        data_type: BOOLEAN
+      - name: DEMO_CASE_LABEL
+        expr: DEMO_CASE_LABEL
+        data_type: VARCHAR
+    facts:
+      - name: TOTAL_OUTSTANDING_INR
+        expr: TOTAL_OUTSTANDING_INR
+        data_type: FLOAT
+      - name: TOTAL_ARREARS_INR
+        expr: TOTAL_ARREARS_INR
+        data_type: FLOAT
+      - name: ARREARS_TO_CLEAR_FOR_UPGRADE_INR
+        expr: ARREARS_TO_CLEAR_FOR_UPGRADE_INR
+        data_type: FLOAT
+      - name: FOIR_TRUE_PCT
+        expr: FOIR_TRUE_PCT
+        data_type: FLOAT
+      - name: BT_RISK_SCORE
+        expr: BT_RISK_SCORE
+        data_type: NUMBER
+      - name: BT_RETENTION_VALUE_IF_OFFERED_INR
+        expr: BT_RETENTION_VALUE_IF_OFFERED_INR
+        data_type: FLOAT
+      - name: LTV_EXPECTED_INTEREST_INR
+        expr: LTV_EXPECTED_INTEREST_INR
+        data_type: FLOAT
+  - name: NBA_RECOMMENDATION
+    description: Next-best-action recommendations. status is ALWAYS PENDING_APPROVAL
+      at creation. rule_basis is NOT NULL by construction.
+    base_table:
+      database: BORROWER360
+      schema: AI
+      table: NBA_RECOMMENDATION
+    dimensions:
+      - name: RECOMMENDATION_ID
+        expr: RECOMMENDATION_ID
+        data_type: VARCHAR
+      - name: BORROWER_ID
+        expr: BORROWER_ID
+        data_type: VARCHAR
+      - name: LOAN_ID
+        expr: LOAN_ID
+        data_type: VARCHAR
+      - name: ACTION_CODE
+        expr: ACTION_CODE
+        data_type: VARCHAR
+      - name: ACTION_FAMILY
+        expr: ACTION_FAMILY
+        data_type: VARCHAR
+      - name: RULE_BASIS
+        expr: RULE_BASIS
+        data_type: VARCHAR
+      - name: MODEL_CONTRIBUTION
+        expr: MODEL_CONTRIBUTION
+        data_type: VARCHAR
+      - name: BORROWER_FACING_MESSAGE
+        expr: BORROWER_FACING_MESSAGE
+        data_type: VARCHAR
+      - name: EXPECTED_VALUE_INR
+        expr: EXPECTED_VALUE_INR
+        data_type: NUMBER
+      - name: BUREAU_DISCLOSURE
+        expr: BUREAU_DISCLOSURE
+        data_type: VARCHAR
+      - name: REQUIRES_HUMAN_APPROVAL
+        expr: REQUIRES_HUMAN_APPROVAL
+        data_type: BOOLEAN
+      - name: STATUS
+        expr: STATUS
+        data_type: VARCHAR
+    time_dimensions:
+      - name: CREATED_AT
+        expr: CREATED_AT
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: MARGIN_IMPACT_BPS
+        expr: MARGIN_IMPACT_BPS
+        data_type: NUMBER
+verified_queries:
+  - name: 0;1
+    question: How many borrowers are in each RBI asset classification?
+    sql: SELECT BORROWER_ASSET_CLASS, COUNT(*) FROM borrower_360 GROUP BY BORROWER_ASSET_CLASS
+    verified_at: 1787330172
+    verified_by: Semantic Model Generator
+  - name: 1;1
+    question: Which borrowers are at highest risk of balance transfer, ranked by their
+      lifetime value?
+    sql: SELECT BORROWER_ID, FULL_NAME, LTV_EXPECTED_INTEREST_INR FROM borrower_360
+      WHERE BT_IS_A_FLIGHT_RISK = TRUE ORDER BY LTV_EXPECTED_INTEREST_INR DESC LIMIT
+      20
+    verified_at: 1787330172
+    verified_by: Semantic Model Generator
+  - name: 2;1
+    question: Which borrowers have a deteriorating sentiment trajectory across their
+      calls?
+    sql: SELECT BORROWER_ID, FULL_NAME, OVERALL_SENTIMENT_DIRECTION, ANY_PTP_MADE_THEN_MISSED
+      FROM borrower_360 WHERE OVERALL_SENTIMENT_DIRECTION = 'DETERIORATING'
+    verified_at: 1787330172
+    verified_by: Semantic Model Generator
+  - name: 3;1
+    question: What pending collections actions are recommended and why?
+    sql: SELECT r.BORROWER_ID, r.ACTION_CODE, r.RULE_BASIS, r.EXPECTED_VALUE_INR FROM
+      nba_recommendation AS r WHERE r.STATUS = 'PENDING_APPROVAL' AND r.ACTION_FAMILY
+      = 'COLLECTIONS'
+    verified_at: 1787330172
+    verified_by: Semantic Model Generator
+  - name: 4;1
+    question: How many NPA borrowers are eligible to upgrade back to standard?
+    sql: SELECT COUNT(*) FROM borrower_360 WHERE IS_NPA = TRUE AND NPA_UPGRADE_ELIGIBLE
+      = TRUE
+    verified_at: 1787330172
+    verified_by: Semantic Model Generator

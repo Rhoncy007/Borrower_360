@@ -1,0 +1,39 @@
+{
+  "json_proto": {
+    "name": "BORROWER_360_MODEL",
+    "database": "BORROWER360",
+    "schema": "SEMANTIC",
+    "tables": [
+      {
+        "database": "BORROWER360", "schema": "CURATED", "table": "BORROWER_360",
+        "columnNames": ["BORROWER_ID","FULL_NAME","CITY","STATE","CITY_TIER","OCCUPATION_TYPE",
+          "MONTHLY_INCOME_INR","BUREAU_SCORE","BUREAU_SCORE_BAND","OWN_LOAN_COUNT","OWN_PRODUCT_COUNT",
+          "TOTAL_OUTSTANDING_INR","TOTAL_ARREARS_INR","BORROWER_ASSET_CLASS","IS_NPA",
+          "NPA_UPGRADE_ELIGIBLE","ARREARS_TO_CLEAR_FOR_UPGRADE_INR","PERFORMING_LOANS_DRAGGED_TO_NPA",
+          "IS_LOAN_STACKED","TOTAL_LENDER_COUNT","FOIR_TRUE_PCT","EARLY_WARNING_MANDATES",
+          "BT_RISK_SCORE","BT_IS_A_FLIGHT_RISK","BT_RETENTION_VALUE_IF_OFFERED_INR",
+          "LTV_EXPECTED_INTEREST_INR","N_INTERACTIONS","OVERALL_SENTIMENT_DIRECTION",
+          "ANY_PTP_MADE_THEN_MISSED","ANY_REASON_CHANGE","DAYS_GAP_TREND",
+          "N_PENDING_RECOMMENDATIONS","HAS_COLLECTIONS_ACTION","HAS_RETENTION_OFFER",
+          "HAS_GROWTH_OFFER","IS_DEMO_CASE","DEMO_CASE_LABEL"]
+      },
+      {
+        "database": "BORROWER360", "schema": "AI", "table": "NBA_RECOMMENDATION",
+        "columnNames": ["RECOMMENDATION_ID","BORROWER_ID","LOAN_ID","ACTION_CODE","ACTION_FAMILY",
+          "RULE_BASIS","MODEL_CONTRIBUTION","BORROWER_FACING_MESSAGE","MARGIN_IMPACT_BPS",
+          "EXPECTED_VALUE_INR","BUREAU_DISCLOSURE","REQUIRES_HUMAN_APPROVAL","STATUS","CREATED_AT"]
+      }
+    ],
+    "sqlSource": {
+      "queries": [
+        {"sqlText": "SELECT borrower_asset_class, COUNT(*) FROM BORROWER360.CURATED.BORROWER_360 GROUP BY borrower_asset_class", "correspondingQuestion": "How many borrowers are in each RBI asset classification?"},
+        {"sqlText": "SELECT borrower_id, full_name, ltv_expected_interest_inr FROM BORROWER360.CURATED.BORROWER_360 WHERE bt_is_a_flight_risk = TRUE ORDER BY ltv_expected_interest_inr DESC LIMIT 20", "correspondingQuestion": "Which borrowers are a genuine balance transfer flight risk, ranked by lifetime value?"},
+        {"sqlText": "SELECT borrower_id, full_name, overall_sentiment_direction, any_ptp_made_then_missed FROM BORROWER360.CURATED.BORROWER_360 WHERE overall_sentiment_direction = 'DETERIORATING'", "correspondingQuestion": "Which borrowers have a deteriorating sentiment trajectory across their calls?"},
+        {"sqlText": "SELECT r.borrower_id, r.action_code, r.rule_basis, r.expected_value_inr FROM BORROWER360.AI.NBA_RECOMMENDATION r WHERE r.status = 'PENDING_APPROVAL' AND r.action_family = 'COLLECTIONS'", "correspondingQuestion": "What pending collections actions are recommended and why?"},
+        {"sqlText": "SELECT COUNT(*) FROM BORROWER360.CURATED.BORROWER_360 WHERE is_npa = TRUE AND npa_upgrade_eligible = TRUE", "correspondingQuestion": "How many NPA borrowers are eligible to upgrade back to standard?"}
+      ]
+    },
+    "semanticDescription": "Unified borrower 360 for an Indian mixed-NBFC retail lending portfolio. Combines RBI-compliant credit risk classification (borrower-level, per IRAC norms), balance-transfer flight risk (structurally separated from credit risk - a distressed borrower always scores zero BT risk), a lifetime-value proxy (expected future interest income from the real amortization schedule, assuming the loan runs to full term), and sentiment/behavioral trajectory signals derived from sequenced call transcripts. Paired with the deterministic next-best-action recommendation engine, where every action traces to a named rule and carries an expected value.",
+    "metadata": {"warehouse": "COMPUTE_WH"}
+  }
+}
